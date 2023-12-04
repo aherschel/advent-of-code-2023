@@ -7,6 +7,7 @@ if (!inputFilename || !fs.existsSync(inputFilename)) {
   process.exit(1);
 }
 
+// Rather than figure out the right way to split the chars, just replace multiple whitespaces until it's correct
 const numberListFromText = (numberText) => numberText
   .trim()
   .replace('  ', ' ')
@@ -26,22 +27,16 @@ const results = gameRows.map((line) => {
   const score = matchCount >= 1 ? 2 ** (matchCount - 1) : 0;
   return { score, matchCount };
 });
-  
+
+// Part 1
 const score = results.map(({ score }) => score).reduce((a, b) => a + b);
 console.log(`Produced Score: ${score}`);
 
-const cardQueue = results.map(({ matchCount }, index) => ({ index, matchCount }));
-// const seenCards = [...cardQueue];
-const hitCounts = new Array(gameRows.length).fill(0);
-while (cardQueue.length > 0) {
-  const { index, matchCount } = cardQueue.shift();
-  hitCounts[index]++;
-  for (let i = 1; i <= matchCount; i++) {
-    const nextIndex = index + i;
-    const nextCard = { index: nextIndex, matchCount: results[nextIndex].matchCount };
-    cardQueue.push(nextCard);
-    // seenCards.push(nextCard);
+// Part 2
+const hitCounts = new Array(gameRows.length).fill(1);
+for (let i = 0; i < hitCounts.length; i++) {
+  for (let j = 1; j <= results[i].matchCount; j++) {
+    hitCounts[i + j] += hitCounts[i];
   }
 }
-// seenCards.forEach(({ index }) => hitCounts[index]++);
-// console.log(`Accrued Total Card Count: ${seenCards.length}`);
+console.log(`CardCount: ${hitCounts.reduce((a, b) => a + b)}`);
