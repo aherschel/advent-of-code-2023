@@ -1,0 +1,13 @@
+{
+  "name": "4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "execute": "node index.js input.txt",
+    "execute:test": "node index.js sample.txt"
+  },
+  "author": "",
+  "license": "ISC"
+}
