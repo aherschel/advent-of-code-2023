@@ -1,0 +1,17 @@
+{
+  "name": "6",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "execute": "tsx index.ts input.txt",
+    "execute:test": "tsx index.ts sample.txt"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.3",
+    "tsx": "^4.6.2"
+  }
+}
