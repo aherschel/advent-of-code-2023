@@ -20,20 +20,14 @@
 (def place-multiplier 12)
 (def hand-type-multipler (exp place-multiplier 6))
 
-(def card-values '("2" "3" "4" "5" "6" "7" "8" "9" "T" "J" "Q" "K" "A"))
-(def score-index (into {} (map-indexed #(vector %2 %1) card-values)))
+(def score-index
+  (into {} (map-indexed #(vector %2 %1) '("2" "3" "4" "5" "6" "7" "8" "9" "T" "J" "Q" "K" "A"))))
 
 (defn split-hand [hand] (str/split hand #""))
 (defn compute-positional-card-score
   "Take the sum of card score-indexes + their place & the place-multipler"
   [hand part-score-index]
   (reduce + (map-indexed #(* (exp place-multiplier (inc %1)) (get part-score-index %2)) (reverse (split-hand hand)))))
-
-(comment
-  (reverse (map-indexed #(* (exp place-multiplier %1) (get score-index %2)) (reverse (split-hand "KAAAA"))))
-  (reverse (map-indexed #(* (exp place-multiplier %1) (get score-index %2)) (reverse (split-hand "A2222"))))
-  (compute-positional-card-score "KAAAA" score-index)
-  (compute-positional-card-score "A2222" score-index))
 
 (defn double-freq-into-hand-type-score
   [double-freq]
@@ -60,9 +54,22 @@
   ([hand wildcard]
    (let [freq                    (frequencies (split-hand hand))
          wildcard-count          (get freq wildcard 0)
-         freq-vals-with-wildcard (map #(+ % wildcard-count) (vals (dissoc freq wildcard)))
+         freqs-without-wildcard  (or (vals (dissoc freq wildcard)) '())
+         max-val                 (apply max (if (empty? freqs-without-wildcard) '(0) freqs-without-wildcard))
+         freq-vals-with-wildcard (conj (remove #(= % max-val) freqs-without-wildcard) (+ max-val wildcard-count))
          double-freq             (frequencies freq-vals-with-wildcard)]
      (double-freq-into-hand-type-score double-freq))))
+
+(comment
+  (if (empty? '()) '(1) '())
+  (apply max '(1))
+  (let [hand "JJJJJ" 
+        wildcard "J"
+        freq                    (frequencies (split-hand hand))
+        wildcard-count          (get freq wildcard 0) 
+        freqs-without-wildcard (or (vals (dissoc freq wildcard)) '())
+        max-val (apply max (if (empty? freqs-without-wildcard) '(0) freqs-without-wildcard))]
+    (conj (remove #(= % max-val) freqs-without-wildcard) (+ max-val wildcard-count))))
 
 (defn compute-hand-score
   "Given a hand, compute a unique score to allow for a simple sort-by
@@ -124,6 +131,7 @@
     (reduce + bid-scores)))
 
 (comment
+  input
   (sort-by #(compute-hand-score-part-2 (:hand %)) (map parse-hand test-input))
   (compute-bid-scores-part-2 test-input)
   (= (compute-bid-scores-part-2 test-input) test-output-part-2)
