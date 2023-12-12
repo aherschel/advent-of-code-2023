@@ -83,11 +83,36 @@
     {:nodes (map #(get-next-node % direction) nodes)
      :steps (inc steps)}))
 
-(while (not (=
-             (count (:nodes @part-2-state))
-             (count (get-strings-ending-with (:nodes @part-2-state) "Z"))))
-  (if (= (mod (:steps @part-2-state) 100000) 0)
-    (println (str "Step " (:steps @part-2-state) " and state " @part-2-state)))
-  (swap! part-2-state compute-next-part-2-state))
 
-(println (str "Got to " endpoint-point " in " (:steps @part-2-state) " steps"))
+(defn get-steps-for-node
+  "For a given node, compute and return the step count"
+  [node]
+  (loop [curr-node node
+         step 0]
+    (if (= (last (split-string curr-node)) "Z")
+      step
+      (recur (get-next-node curr-node (nth directions (mod step (count directions)))) (inc step)))))
+
+(def start-nodes (get-strings-ending-with (keys nodes) "A"))
+(def cycle-lengths (map get-steps-for-node start-nodes))
+
+
+;; Copied from clojure.math.numeric-tower
+
+(defn gcd "(gcd a b) returns the greatest common divisor of a and b" [a b]
+  (if (or (not (integer? a)) (not (integer? b)))
+    (throw (IllegalArgumentException. "gcd requires two integers"))
+    (loop [a (abs a) b (abs b)]
+      (if (zero? b) a,
+          (recur b (mod a b))))))
+
+(defn lcm
+  "(lcm a b) returns the least common multiple of a and b"
+  [a b]
+  (when (or (not (integer? a)) (not (integer? b)))
+    (throw (IllegalArgumentException. "lcm requires two integers")))
+  (cond (zero? a) 0
+        (zero? b) 0
+        :else (abs (* b (quot a (gcd a b))))))
+
+(reduce lcm cycle-lengths)
